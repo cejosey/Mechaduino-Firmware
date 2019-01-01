@@ -515,7 +515,6 @@ void serialCheck() {        //Monitors serial for commands.  Must be called in r
         moveRel(posFin, velMax, accelB);
         break;
 
-
       default:
         break;
     }
@@ -1175,7 +1174,7 @@ void moveRel(float pos_final,int vel_max, int accel){
    //Max speed with dpos = 0.45 degrees is about 360 deg/sec 
   
   float pos = 0;
-  float dpos = 0.1;  // "step size" in degrees, smaller is smoother, but will limit max speed, keep below stepper step angle
+  float dpos = 0.9;  // "step size" in degrees, smaller is smoother, but will limit max speed, keep below stepper step angle
   float vel = 0;      // 
   float vel_1 =0;
   int start = micros(); //for debugging
@@ -1333,3 +1332,4 @@ void moveAbs(float pos_final,int vel_max, int accel){
   //SerialUSB.print(micros()-start);
   
 }
+
