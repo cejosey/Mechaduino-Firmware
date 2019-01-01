@@ -11,6 +11,11 @@
 #include "State.h"
 #include "analogFastWrite.h"
 
+float posFin = 0;
+float velMax = 0;
+float accelB = 0;
+
+
 void setupPins() {
 
   pinMode(VREF_2, OUTPUT);
@@ -453,6 +458,8 @@ void serialCheck() {        //Monitors serial for commands.  Must be called in r
         break;
 
       case 'x':
+        wrap_count = 0;       // don't unwind from some over 360 position
+        r = read_angle();     // hold current position
         mode = 'x';           //position loop
         break;
 
@@ -490,6 +497,22 @@ void serialCheck() {        //Monitors serial for commands.  Must be called in r
         
       case 'j':
         stepResponse();
+        break;
+
+// my stuff here
+      case 'b':
+        while (SerialUSB.available() == 0)  {}
+        posFin = SerialUSB.parseFloat();
+        velMax = SerialUSB.parseFloat();
+        accelB = SerialUSB.parseFloat();
+        SerialUSB.print("Final position ");
+        SerialUSB.println(posFin);
+        SerialUSB.print("Max velocity ");
+        SerialUSB.println(velMax);
+        SerialUSB.print("Acceleration ");
+        SerialUSB.println(accelB);
+ 
+        moveRel(posFin, velMax, accelB);
         break;
 
 
@@ -1059,6 +1082,7 @@ void serialMenu() {
   SerialUSB.println(" x  -  position mode");
   SerialUSB.println(" v  -  velocity mode");
   SerialUSB.println(" t  -  torque mode");
+  SerialUSB.println(" b  -  move relative (b finalposition maxvelocity acceleration)");
   SerialUSB.println("");
   SerialUSB.println(" y  -  enable control loop");
   SerialUSB.println(" n  -  disable control loop");
@@ -1151,7 +1175,7 @@ void moveRel(float pos_final,int vel_max, int accel){
    //Max speed with dpos = 0.45 degrees is about 360 deg/sec 
   
   float pos = 0;
-  float dpos = 0.45;  // "step size" in degrees, smaller is smoother, but will limit max speed, keep below stepper step angle
+  float dpos = 0.1;  // "step size" in degrees, smaller is smoother, but will limit max speed, keep below stepper step angle
   float vel = 0;      // 
   float vel_1 =0;
   int start = micros(); //for debugging
